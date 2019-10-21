@@ -1,0 +1,123 @@
+#define  _CRT_SECURE_NO_WARNINGS 
+#include <iostream>
+
+using namespace std;
+//选作-停车场管理
+
+struct carStack {
+	int num;
+	int time;
+};
+
+struct carQueue {
+	int num;
+	int time;
+	carQueue* ptr;
+};
+
+class Parking {
+public:	
+	carStack list[2];
+	carQueue* ptrF;
+	carQueue* ptrL;
+	int _num;
+	int __num;
+	int label;
+
+	Parking() {
+		for (int i = 0; i < 20; i++) {
+			list[i].num = -1;
+		}
+		_num = 0;
+		__num = 0;
+		label = 0;
+	}
+
+	void push(int num,int time) {
+		if (_num == 2 && label==0) {
+			carQueue* p =  (carQueue*)operator new(sizeof(carQueue));
+			p->num = num;
+			p->time = time;
+			ptrL = p;
+			ptrF = p;
+			label = 1;
+			__num = 1;
+			printf("%d停在了便道\n",num);
+		}
+		else if (_num == 2 && label == 1) {
+			input(num,time);
+		}
+		else {
+			for (int i = 0; i < _num; i++) {
+				list[i + 1].num = list[i].num;
+				list[i + 1].time = list[i].time;
+			}
+			list[0].num = num;
+			list[0].time = time;
+			printf("%d停在了第%d个停车位\n", num, _num+1);
+			_num++;
+		}
+	}
+
+	void pop(int num,int time) {
+		int index = 0;
+		for (; ;index++) {
+			if (list[index].num == num) {
+				printf("%d离开了，支付了%d的停车费\n", num, time-list[index].time);
+				break;
+			}
+		}
+		for (int i = index; i < num; i++) {
+			list[i] = list[i + 1];
+		}
+		_num--;
+		if (_num == 1 && __num > 0) {
+			push(output(), time);
+		}
+	}
+
+	void input(int num,int time) {
+		carQueue* p =  (carQueue*)operator new(sizeof(carQueue));
+		p->num = num;
+		p->time = time;
+		ptrL->ptr = p;
+		ptrL = p;
+		printf("%d停在了便道\n",num);
+		__num++;
+	}
+
+	int output() {
+		int result = ptrF->num;
+		carQueue* p = ptrF;
+		ptrF = ptrF->ptr;
+		operator delete(p);
+		__num--;
+		return result;
+	}
+};
+
+int main() {
+	Parking p = Parking();
+	char a[10];
+	char state;
+	int num;
+	int time;
+
+	while (true) {
+		cout << "请输入数据" << endl;
+		scanf("('%c',%d,%d)", &state, &num, &time);
+		if (state == 'D') {
+			p.pop(num, time);
+		}
+		else if (state == 'A') {
+			p.push(num, time);
+		}
+		else {
+			break;
+		}
+		while(cin.get() != '\n') ;
+	}
+
+	while (true);
+	return 0;
+}
